@@ -14,6 +14,7 @@ LIBRETRO_CORES="\
                 anarch \
                 applewin \
                 ardens \
+                armsx2 \
                 atari800 \
                 azahar \
                 b2 \
@@ -110,6 +111,7 @@ LIBRETRO_CORES="\
                 mesen_s \
                 mgba \
                 mgba_fork \
+                minivmac \
                 mojozork \
                 mrboom \
                 mu \
@@ -124,6 +126,7 @@ LIBRETRO_CORES="\
                 openlara \
                 opera \
                 panda3ds \
+                parallel_dc \
                 parallel_n64 \
                 pcsx_rearmed \
                 pd777 \
@@ -284,6 +287,7 @@ elif [ "${PROJECT}" = "RPi" ]; then
                               openlara \
                               opera \
                               panda3ds \
+                              parallel_dc \
                               parallel_n64 \
                               play \
                               ppsspp \
@@ -311,6 +315,7 @@ elif [ "${PROJECT}" = "RPi" ]; then
                               flycast \
                               openlara \
                               panda3ds \
+                              parallel_dc \
                               play \
                               ppsspp \
                               vircon32 \
@@ -325,6 +330,16 @@ elif [ "${PROJECT}" = "RPi" ]; then
 
 elif [ "${PROJECT}" = "Samsung" ]; then
   EXCLUDE_LIBRETRO_CORES+=" lr_moonlight"
+fi
+
+# lrps2 on aarch64 needs Vulkan
+if [ "${ARCH}" = "aarch64" ]; then
+    if [ "${VULKAN_SUPPORT}" != "yes" ]; then
+        EXCLUDE_LIBRETRO_CORES+=" lrps2 armsx2"
+    fi
+else
+    # armsx2 is ARM64-only and cannot run on other architectures
+    EXCLUDE_LIBRETRO_CORES+=" armsx2"
 fi
 
 # exclude some cores at build time via env EXCLUDE_LIBRETRO_CORES="core1 core2"
