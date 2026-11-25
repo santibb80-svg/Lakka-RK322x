@@ -1,143 +1,113 @@
-# Lakka RK322X
+# EmuSanti — Lakka para Rockchip RK322X
 
-## Proyecto de adaptación de Lakka para TV Box Rockchip RK322X
+## 1. Descripción
 
-Lakka RK322X es un proyecto comunitario cuyo objetivo es adaptar la distribución Linux Lakka a TV Box basados en procesadores Rockchip de la familia RK322X.
+EmuSanti es un proyecto comunitario basado en Lakka y LibreELEC, adaptado para TV Box con procesadores Rockchip de la familia RK322X.
 
-Lakka transforma pequeños dispositivos en consolas de emulación retro mediante RetroArch y su ecosistema de emuladores.
-
-Este proyecto parte del código de Lakka/LibreELEC y conserva las adaptaciones específicas necesarias para los dispositivos RK322X.
+Su objetivo es convertir estos dispositivos en pequeñas consolas de emulación retro mediante RetroArch y su ecosistema de emuladores.
 
 **Proyecto independiente y experimental. No es una versión oficial de Lakka ni de LibreELEC.**
 
----
+## 2. Hardware objetivo
 
-## 1. Objetivo del proyecto
+La adaptación se centra inicialmente en dispositivos con estas características:
 
-El objetivo principal es recuperar, mantener y mejorar la compatibilidad de TV Box Rockchip RK322X con versiones recientes de Lakka.
-
-El desarrollo se centra inicialmente en dispositivos con las siguientes características:
-
-- Procesador: Rockchip RK3228A.
+- SoC: Rockchip RK3228A.
 - Memoria RAM: 1 GB.
-- Arquitectura: ARM.
-- Plataforma: RK322X.
+- Arquitectura: ARMv7, 32 bits.
+- Plataforma: Rockchip RK322X.
 
-La compatibilidad puede variar según el fabricante, la placa, la memoria, el Wi-Fi y el bootloader de cada dispositivo.
+La compatibilidad puede variar según la placa, la memoria, el Wi-Fi y el bootloader de cada TV Box.
 
----
+## 3. Base técnica
 
-## 2. Base del proyecto
-
-El proyecto utiliza como base:
+La versión actual utiliza:
 
 - Lakka 6.1.
 - LibreELEC Build System.
 - Plataforma Rockchip.
-- Configuración específica RK322X.
-- Kernel Linux 6.18.19 en la compilación realizada.
+- Dispositivo RK322X.
+- Kernel Linux 6.18.19.
+- U-Boot 2025.07.
+- RetroArch 1.22.2.
+- Arquitectura ARM de 32 bits.
 
-Se ha integrado la actualización oficial de Lakka 6.1, manteniendo las adaptaciones originales para RK322X.
+## 4. Cambios y adaptaciones realizadas
 
----
+### 4.1. Integración de Lakka 6.1
 
-## 3. Cambios y mejoras realizadas
+Se han incorporado las actualizaciones de Lakka 6.1 manteniendo las adaptaciones específicas para RK322X.
 
-### 3.1. Integración de Lakka 6.1
+### 4.2. Adaptación de controladores Wi-Fi al kernel 6.18
 
-Se han incorporado las actualizaciones del proyecto oficial Lakka 6.1 a la rama de desarrollo, conservando los archivos y configuraciones específicos de RK322X.
+Se han realizado correcciones para adaptar controladores antiguos a las interfaces del kernel:
 
-### 3.2. Compatibilidad de controladores Wi-Fi con Linux 6.18
-
-Durante la compilación se detectaron incompatibilidades entre varios controladores Wi-Fi antiguos y las nuevas firmas de funciones de la API inalámbrica del kernel.
-
-Se han realizado las siguientes correcciones:
-
-#### SSV6051
-
-Archivo:
-
-`projects/Rockchip/devices/RK322X/patches/linux/default/wifi-driver-ssv6051.patch`
-
-Modificación:
+**SSV6051**
 - Actualización de la firma de `ssv6200_config`.
-- Incorporación del parámetro `link_id` requerido por el kernel.
+- Incorporación del parámetro `link_id`.
 
-#### ESP8089
-
-Archivo:
-
-`projects/Rockchip/devices/RK322X/patches/linux/default/wifi-driver-esp8089.patch`
-
-Modificaciones:
+**ESP8089**
 - Actualización de `esp_op_config`.
 - Actualización de `esp_op_set_rts_threshold`.
-- Incorporación del parámetro `link_id` en ambas funciones.
+- Incorporación del parámetro `link_id`.
 
-#### RTL8189ES
-
-Nuevo archivo:
-
-`projects/Rockchip/devices/RK322X/packages/RTL8189ES/patches/rtl8189es-kernel-6.18.patch`
-
-Modificaciones:
+**RTL8189ES**
 - Adaptación de `cfg80211_rtw_set_wiphy_params`.
 - Adaptación de `cfg80211_rtw_set_txpower`.
 - Adaptación de `cfg80211_rtw_get_txpower`.
-- Incorporación condicional de parámetros para kernels Linux 6.18 y posteriores.
+- Compatibilidad condicional con kernels Linux 6.18 y posteriores.
 
-Estas correcciones permiten adaptar las firmas de los controladores a las interfaces esperadas por el kernel.
+Estas modificaciones permiten adaptar los controladores a las interfaces del kernel utilizado.
 
-### 3.3. Modificación del entorno Docker
+## 5. Compilación nativa en Linux
 
-Archivo:
+La compilación de EmuSanti se realiza directamente en Linux mediante el sistema de construcción de LibreELEC.
 
-`tools/docker/noble/Dockerfile`
-
-Se ha incorporado el paquete `curl` a la imagen Docker basada en Ubuntu 24.04 Noble, necesario para completar correctamente el proceso de compilación.
-
----
-
-## 4. Entorno de compilación
-
-La compilación se realiza mediante Docker utilizando el sistema de construcción de LibreELEC.
+**No se necesita Docker.**
 
 ### Requisitos
 
 - Linux de 64 bits.
-- Docker instalado y funcionando.
 - Git.
+- GCC y herramientas de desarrollo.
+- Make.
+- Python 3.
 - Conexión a Internet.
 - Espacio libre suficiente para descargar las fuentes y compilar.
 
-### 4.1. Construir la imagen Docker
+Se recomienda disponer de varios GB de RAM y suficiente espacio libre en disco.
 
-Desde la carpeta raíz del proyecto:
+### 5.1. Comprobar dependencias
+
+Desde la carpeta raíz del repositorio:
 
 ```bash
-sudo docker build --pull -t libreelec tools/docker/noble
+scripts/checkdeps
+```
 
+Este comando comprueba las dependencias necesarias para compilar.
 
-4.2. Compilar Lakka para RK322X
+### 5.2. Compilar EmuSanti para RK322X
 
-Comando utilizado para la compilación:
+Comando utilizado para generar la imagen:
 
-sudo docker run -it --rm --log-driver none --user 1000:1000 -v "$PWD":/build -w /build -e HOME=/tmp -e BUILDER_NAME=EmuSanti -e BUILD_PERIODIC=nightly -e PROJECT=Rockchip -e DEVICE=RK322X -e ARCH=arm -e UBOOT_SYSTEM=rk322x -e DISABLE_LIBRETRO_CORES=yes libreelec make image
-
+```bash
+BUILDER_NAME=EmuSanti PROJECT=Rockchip DEVICE=RK322X ARCH=arm make image
+```
 
 Configuración utilizada:
-- BUILDER_NAME: EmuSanti.
-- BUILD_PERIODIC: nightly.
-- PROJECT: Rockchip.
-- DEVICE: RK322X.
-- ARCH: arm.
-- UBOOT_SYSTEM: rk322x.
-- DISABLE_LIBRETRO_CORES: yes.
-Importante: La opción DISABLE_LIBRETRO_CORES=yes compila el sistema sin incluir los cores de Libretro.
 
-El parámetro --user 1000:1000 corresponde al usuario utilizado en el entorno de desarrollo original. Puede ser necesario adaptarlo en otros equipos.
+- `BUILDER_NAME=EmuSanti`: nombre del builder.
+- `PROJECT=Rockchip`: plataforma Rockchip.
+- `DEVICE=RK322X`: dispositivo objetivo.
+- `ARCH=arm`: arquitectura ARM de 32 bits.
+- `make image`: construye la imagen del sistema.
 
-5. Repositorio y ramas
+La compilación incluye **73 cores de Libretro** seleccionados para la plataforma ARM de 32 bits.
+
+Los archivos generados se encuentran en la carpeta `target/`.
+
+## 6. Repositorio y ramas
 
 Repositorio GitHub:
 
@@ -145,65 +115,64 @@ https://github.com/santibb80-svg/Lakka-RK322x
 
 Rama de desarrollo:
 
-lab/lakka-6.1-update
+`lab/lakka-6.1-update`
 
 Rama de respaldo:
 
-backup/rk322x-port-original
+`backup/rk322x-port-original`
 
-El repositorio oficial se utiliza como referencia para integrar actualizaciones:
+Repositorio oficial utilizado como referencia:
 
 https://github.com/libretro/Lakka-LibreELEC
 
-Los cambios específicos de RK322X se mantienen dentro de este repositorio.
+Los cambios específicos de RK322X se mantienen en este fork.
 
-6. Estado del proyecto
-Estado: compilación completada correctamente con las correcciones incorporadas.
+## 7. EmuSanti 1.0
 
-Se han conseguido:
+La primera versión funcional se ha compilado y publicado como GitHub Release.
 
-- Integrar Lakka 6.1.
-- Mantener las adaptaciones específicas RK322X.
-- Corregir los errores de compilación de SSV6051.
-- Corregir los errores de compilación de ESP8089.
-- Corregir los errores de compilación de RTL8189ES.
-- Actualizar el entorno Docker con curl.
-- Completar la compilación del sistema.
-La compilación correcta no implica que todas las funciones estén verificadas en todos los modelos de TV Box.
+**Descarga:**
 
-Es necesario realizar pruebas en el dispositivo físico para comprobar:
+https://github.com/santibb80-svg/Lakka-RK322x/releases/tag/EmuSanti-1.0
 
-- Arranque del sistema.
-- Salida de vídeo y resolución.
-- Sonido.
-- Conectividad Wi-Fi.
-- Mandos y dispositivos USB.
-- Rendimiento de la emulación.
+Características de esta versión:
 
-7. Limitaciones y advertencias
+- Lakka 6.1.
+- RetroArch 1.22.2.
+- ARMv7 de 32 bits.
+- 73 cores de Libretro.
+- Adaptación para TV Box Rockchip RK322X.
+
+La imagen se ha probado en hardware real con un TV Box Rockchip RK3228A.
+
+Se ha comprobado el arranque del sistema, la interfaz de RetroArch y la detección de un mando Xbox 360.
+
+## 8. Limitaciones y advertencias
 
 - Proyecto experimental y en desarrollo.
 - No todos los TV Box RK322X utilizan la misma placa o configuración de hardware.
 - La compatibilidad Wi-Fi depende del controlador instalado en cada dispositivo.
-- La compilación descrita se ha realizado sin cores de Libretro.
-- No se garantiza la compatibilidad con todos los modelos.
-- Se recomienda conservar una copia de seguridad del firmware original antes de probar una imagen nueva.
+- No se garantiza el funcionamiento de todas las características en todos los modelos.
+- Se recomienda conservar una copia de seguridad del firmware original antes de instalar una imagen nueva.
+
 La instalación y las pruebas se realizan bajo responsabilidad del usuario.
 
-8. Créditos y agradecimientos
+## 9. Créditos y agradecimientos
 
-Este proyecto se apoya en el trabajo de los desarrolladores y comunidades de:
+Este proyecto se apoya en el trabajo de:
+
 - Lakka: https://www.lakka.tv/
 - Lakka LibreELEC: https://github.com/libretro/Lakka-LibreELEC
 - LibreELEC: https://libreelec.tv/
 - Comunidad Rockchip.
 - Desarrolladores originales de los controladores Wi-Fi utilizados.
+
 Se respetan las licencias originales de los componentes y controladores incluidos.
 
-9. Filosofía del proyecto
+## 10. Filosofía del proyecto
 
-Lakka RK322X nace con la intención de dar una nueva oportunidad a TV Box Rockchip de bajo coste, manteniendo vivo el soporte de estos dispositivos y facilitando su utilización como pequeñas consolas de emulación retro.
+EmuSanti nace con la intención de dar una segunda vida a los TV Box Rockchip de bajo coste, manteniendo el soporte de estos dispositivos y facilitando su utilización como pequeñas consolas de emulación retro.
 
 El proyecto busca conservar las adaptaciones existentes, corregir incompatibilidades y documentar los avances para que otros usuarios puedan colaborar y continuar su desarrollo.
 
-Lakka RK322X — Una segunda vida para los TV Box Rockchip.
+**EmuSanti — Una segunda vida para los TV Box Rockchip.**
